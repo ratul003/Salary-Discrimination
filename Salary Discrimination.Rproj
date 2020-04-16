@@ -1,0 +1,636 @@
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+library(knitr)
+library(ggplot2)
+library(alr4)
+library(tidyverse)
+library(emmeans)
+library(rms)
+library(Sleuth3)
+library(rpart)
+library(DMwR)
+library(Hmisc)
+library(ResourceSelection)
+library(rpart.plot)
+```
+
+## Introduction
+
+The 2008-09 nine-month academic salary for Assistant Professors, Associate Professors and Professors in a college in the U.S. The data were collected as part of the on-going effort of the college's administration to monitor salary differences between male and female faculty members.
+
+Usage
+
+Salaries
+Format
+
+A data frame with 397 observations on the following 6 variables.
+
+rank
+a factor with levels AssocProf AsstProf Prof
+
+discipline
+a factor with levels A ("theoretical" departments) or B ("applied" departments).
+
+yrs.since.phd
+years since PhD.
+
+yrs.service
+years of service.
+
+sex
+a factor with levels Female Male
+
+salary
+nine-month salary, in thousands of dollars.
+
+You should approach this problem from the perspective of an expert witness
+hired by the lawyers of the plaintiff (the potentially discriminated
+female faculty members). You should prepare a report that addresses
+whether there is evidence for discrimination in salaries. Your report
+will be written for the lawyers, your clients, in this case.
+
+Remember that you are working for the plaintiffs, and this may affect what
+variables you include in your analysis, or at least the perspective used interpreting the results.
+
+a) If the report finds evidence for discrimination, it will be read by
+the judge and the defense team. You will need to provide the details of
+how you arrived at your conclusions. These details will eventually be
+hashed out in a trial and you better be prepared to defend your analysis
+actions. If you do something fishy or inappropriate the defense team
+(me) will find it and destroy you in court. You will probably never get
+a fat consulting fee again.
+
+b) If your report finds no evidence for discrimination, your clients
+will ask other experts (me) to criticize your report and determine whether
+it is of sufficient quality to warrant paying your fee. Your
+clients are lawyers and will certainly try to weasel out of paying you
+anything if they have reason to believe your report is anything but
+top-notch statistically. So again you should provide details of how you
+arrived at your conclusions.
+
+Your report should consist of two sections:
+
+1) Executive summary of your findings. This section should be written so
+that lawyers and judges can understand your findings. It should be fairly
+short, concise, and to the point. It should provide some short
+description of how and why you believe what you found. It should be
+written for non-statisticians.
+
+2) The second section should contain the statistical details, and
+arguments concerning your findings. This section should be written for
+other experts, and those people with statistical training. You do not
+need to provide evidence of every dead-end model that you tried or all
+your modeling mistakes. This section is meant to provide support for your
+findings in part 1).
+
+## Instructions and Rules:
+
+*  You may use all the variables in this dataset for your work.  
+
+* However, please be careful - a variable like rank may be subject to discrimination processes. It might be the case that female faculty have a barrier from reaching associate or full professor status.  Your report should include this issue.
+
+* You SHALL NOT consider any transforms of variables to a negative power.  
+
+* The objective is to create model(s) that can address the sex discrimination issue at this college.  I'm expecting you to use the methods of this course to accomplish this.  The grading rubric for this project will involve both technical skill and communication of your results.
+
+* You should add code and written analysis comments, and you are required to maintain the structural outline I have provided. 
+
+* You may not discuss this exam with any other person except the instructor.
+
+
+## Data Preparation
+
+The data are loaded and prepared.  You are not allowed to alter anything until the Executive Summary section below.
+```{r salaryprep, echo=TRUE,warning=FALSE,message=FALSE}
+data(Salaries)
+# add 1/2 to years of service to avoid using a zero.
+Salaries$yrs.service<-Salaries$yrs.service + 0.5
+Salaries$salary <- Salaries$salary/1000
+```
+
+
+
+\clearpage
+
+## Executive Summary 
+
+### Overview of the research
+
+Gender salary gap has been considered a major issue for years throughout the globe and yet to be resolved. Like several statisticians, I made an attempt to analyze and identify whether salary discriminatione exists within gender. After analysing the dataset that was provided to me, we can tell the following:
+  
+  - Male Full-time Professors, Associate Professors and Assistant Professors have higher average salary as compared to Female faculty.
+
+- Male faculty have on average higher salary compared to Female Faculty across both Theoretical and Applied disciplines.
+
+Later, we used a logistic regression model which included independent variables such as sex of the faculty, rank of the faculty listed as Assistant Professor, Associate Professor and Full-time Professor, years of faculty teaching and yrs after getting a phd. Using the statistical model, we created graphical displays that showed that faculty working in Applied Departmetn have higher chance of receiving higher salary as compared to faculty in Theoretical Department. Comparing the predicted salary across different ranking of faculty, we can tell that Full-time Professors have the highest chance of receiving higher salary compared to Associate Professors and Assistant Professors. We can also tell that Associate Professors have higher chance of receiving higher salary as compared to Assistant Professors.
+
+- We can see that Male faculty receives higher salary as Assistant Professor, Associate Professor and Full-time Professors in Theoretical Department. In Applied Department, we can see that Male Associate faculty receives slightly higher salary as compared to Female faculty, however, Female Assistant Professor receives higher salary than Male Assistant Professor and equivalent salary as Full-time Professors in Applied Department.
+
+- For female faculty, the salary increases at a much faster rate when they are promoted from Associate to a Full-time Professor.
+For male faculty, the salary increases at a more steady rate when promoted to next level in the heirarchy.
+
+- In Theoretical Department, Male faculty receive higher salary in all levels of position (Assistant, Associate and Full-time Professors). In Applied Department, Female faculty receive higher salary as Assistant Professors, lower salary as Associate Professors and equivalent salary as Full-time Professors compared to Male faculty.
+
+Final Conclusion : 
+  
+  - There is significant difference in salary between Male and Female faculty within Associate Professor in discipline A.
+
+-  There is no significant difference in salary across gender within Assistant and Full-time Professor in both disciplines A and B.
+
+-  Years of service by faculty and years since phd have no significant effect in salary across both genders.
+
+
+### Overview of the research technical details
+
+- Comparing the predicted salary across disciplines, we can tell from the effects plot that faculty working in Applied Department have higher chance of receiving higher salary as compared to faculty in Theoretical Department.
+
+- Comparing the predicted salary across different ranking of faculty, we can tell from the effects plot that Full-time Professors have the highest chance of receiving higher salary compared to Associate Professors and Assistant Professors. We can also tell that Associate Professors have higher chance of receiving higher salary as compared to Assistant Professors.
+
+- Comparing the predicted salary across two genders of faculty, we can tell that both Male and Female have very similar chances of receiving higher salary - in this case the plots show that actually Female faculty have a slightly higher chance.
+
+- The effects plot shows that the chances of getting higher salary decreases as the faculty served more years at the university.
+
+-  The effects plot shows that the chances of getting higher salary increases as the faculty had spent more years after receiving their phd.
+
+- From the effects plot, we can see that Male faculty receives higher salary as Assistant Professor, Associate Professor and Full-time Professors in Theoretical Department. In Applied Department, we can see that Male Associate faculty receives slightly higher salary as compared to Female faculty, however, Female Assistant Professor receives higher salary than Male Assistant Professor and equivalent salary as Full-time Professors in Applied Department.
+
+- If we pay close attention to the sex * rank effect plot, we see something very interesting. For female faculty, the salary increases at a much faster rate when they are promoted from Associate to a Full-time Professor. For male faculty, the salary increases at a more steady rate when promoted to next level in the heirarchy.
+
+- If we pay close attention to the sex * discipline effect plot, we can see that Male faculty generally have higher salary compared to Female faculty in Theoretical Department. Both Male and Female faculty have similar salary in Applied Department.
+
+- Male faculty: The estimated odds ratio for male faculty is 1.058 with confidence interval (0.928, 1.207) containing 1.0. Suggesting no evidence in difference in percentage of salary between faculty across gender, holding rank,discipline, yrs of service and yrs since phd constant.
+
+- Discipline B: The estimated odds ratio for discipline B is 1.236 with confidence interval (1.101, 1.387). Suggesting clear evidence that faculty teaching in Applied Department has 1.236 times the chance of higher percentage of salary compared to faculty in Theoretical Department holding sex, rank, yrs of service and yrs since phd constant.
+
+- MaleB and FemaleA: The odds ratio for male faculty in Applied Department is 1.198 with confidence interval (1.011, 1.421). Suggesting clear evidence that male Asst Prof faculty teaching in Applied Department has 1.198 times the chance of higher percentage of salary compared to Asst Prof female faculty in Theoretical Department. Since the confidence interval is entirely above 1.0 the difference is statistically significant holding rank = Asst Prof constant.
+
+-  MaleB and FemaleA: The odds ratio for male faculty in Applied Department is 1.294 with confidence interval (1.074, 1.560). Suggesting clear evidence that male Assoc Prof faculty teaching in Applied Department has 1.294 times the chance of higher percentage of salary compared to Assoc Prof female faculty in Theoretical Department. Since the confidence interval is entirely above 1.0 the difference is statistically significant holding rank = Assoc Prof constant.
+
+- MaleB and FemaleA: The odds ratio for male faculty in Applied Department is 1.240 with confidence interval (1.073, 1.433). Suggesting clear evidence that male Full-time Prof faculty teaching in Applied Department has 1.240 times the chance of higher percentage of salary compared to Full-time Prof female faculty in Theoretical Department. Since the confidence interval is entirely above 1.0 the difference is statistically significant holding rank = Full-time Prof constant.
+
+- The odds of salary for Male Asst Prof in discipline A is 2.42 times that of a Female Asst Prof in discipline A. The confidence interval for the odds ratio is (0.71, 8.12), showing no evidence to suggest that the faculty salary differ across gender after adjusting for discipline = A and rank = AsstProf.
+
+- The odds of salary for Male Asst Prof in discipline B is 0.778 times that of a Female Asst Prof in discipline B. The confidence interval for the odds ratio is (0.219, 2.77), showing no evidence to suggest that the faculty salary differ across gender after adjusting for discipline = B and rank = AsstProf.
+
+- The odds of salary for Male Assoc Prof in discipline A is 4.76 times that of a Female Assoc Prof in discipline A. The confidence interval for the odds ratio is (1.201, 18.865), showing evidence to suggest that the faculty salary differ across gender after adjusting for discipline = A and rank = AssocProf.
+
+- The odds of salary for Male Assoc Prof in discipline B is 1.532 times that of a Female Assoc Prof in discipline B. The confidence interval for the odds ratio is (0.419, 5.604), showing no evidence to suggest that the faculty salary differ across gender after adjusting for discipline = B and rank = AssocProf.
+
+- The odds of salary for Male Full-time Prof in discipline A is 2.64 times that of a Female Full-time Prof in discipline A. The confidence interval for the odds ratio is (0.93, 7.51), showing no evidence to suggest that the faculty salary differ across gender after adjusting for discipline = A and rank = Prof.
+
+- The odds of salary for Male Full-time Prof in discipline B is 0.8511 times that of a Female Full-time Prof in discipline B. The confidence interval for the odds ratio is (0.3412, 2.123), showing no evidence to suggest that the faculty salary differ across gender after adjusting for discipline = B and rank = Prof.
+
+- There is significant difference in salary between Male and Female faculty within Associate Professor in discipline A.
+
+- There is no significant difference in salary across gender within Assistant and Full-time Professor in both disciplines A and B.
+
+-  Years of service by and faculty and years since phd has no effect on the significance level in salary across both genders.
+
+\clearpage
+
+## Exploratory Analysis
+
+### Summary Statistics
+
+```{r,warning=FALSE,tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+summary(Salaries)
+str(Salaries)
+describe(Salaries)
+scatterplotMatrix(~ salary+rank+discipline+yrs.since.phd+yrs.service+sex,smooth=list(span=0.55,col.smooth=c("red"),col.spread=c("black"),lty.smooth=1,lwd=1),regLine=FALSE,data=Salaries,main="Scatterplot Matrix")
+
+# Correlation between variables
+C<-c(3,4,6)
+cor(Salaries[,C])
+
+
+scatterplotMatrix(~salary + yrs.service + yrs.since.phd | sex, smooth=T, reg.line=F, spread=F, data=Salaries)
+scatterplotMatrix(~salary + yrs.service + yrs.since.phd + rank| sex, smooth=T, reg.line=F, spread=F, data=Salaries)
+scatterplotMatrix(~salary + yrs.service + yrs.since.phd | discipline, smooth=T, reg.line=F, spread=F, data=Salaries)
+
+
+s<-summaryM(salary~sex,data=Salaries)
+plot(s)
+plot(summary(salary~ rank+sex+discipline,data=Salaries))
+
+```
+
+#### Discussion of the explanatory variables
+
+- Salary, yrs since phd for faculty and yrs of service as a faculty are numeric variables
+- Rank, discipline and sex are categorical variables.
+
+- Salary, yrs since phd and yrs of service have right skewed distribution.
+- From the distribution of rank variable in the data set, we can tell the dataset contains more Prof (level=3) and very simiilar less number of Assistant Prof (level=1) and Associate Prof (level=2).
+- From the distribution of discipline variable, we can tell that it has slightly more number of faculty in Applied Department (level=2) as compared to Theoretical Department (level=1).
+- There are more number of Male faculty (level=2) as compared to Female faculty (level=1) in the dataset.
+- Yrs since phd and yrs of service as a faculty are not strongly positively correlated with salary of the faculty.
+- Variables: yrs since phd and yrs of service are very strongly positively correlated -- maybe potentially causing multicollinearity problem.
+- Variables salary,yrs since phd and yrs of service may require transformation to maintain normality as salary share non-linear relationship with them.
+
+
+### Graphical Displays
+
+
+```{r salarybox,fig.height=7,tidy=TRUE, tidy.opts=list(width.cutoff=80)}
+# an example of a summary graph
+with(Salaries,table(sex,discipline))
+with(Salaries,table(sex,rank))
+
+# Summary statistics showing Average pay by gender and rank
+Salaries %>% group_by(sex,rank) %>% summarise(Avg_salary = mean(salary,na.rm=TRUE),Observations=n())
+
+
+Salaries %>% group_by(sex,discipline) %>% summarise(Avg_salary = mean(salary,na.rm=TRUE),Observations=n())
+Salaries %>% group_by(sex,rank,discipline) %>% summarise(Avg_salary = mean(salary,na.rm=TRUE),Observations=n())
+
+# Graphical displays
+
+box<- ggplot(Salaries, aes(x=sex,y=salary))
+boxplot<- box+geom_point(position=position_jitter(width=0.2),alpha=0.25)
+boxplot + geom_boxplot(outlier.colour = NA,fill=NA) + xlab ("Gender") + ylab("Salary")
+
+g <- ggplot(Salaries, aes(rank, salary))
+g + geom_boxplot(aes(fill=factor(sex))) + 
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) + 
+  labs(title="Box plot", 
+       subtitle="Boxplot of Salary distribution grouped by rank and gender",
+       x="rank",
+       y="Salary")
+
+g1 <- ggplot(Salaries, aes(discipline, salary))
+g1 + geom_boxplot(aes(fill=factor(sex))) + 
+  theme(axis.text.x = element_text(angle=0, vjust=1)) + 
+  labs(title="Box plot", 
+       subtitle="Boxplot of Salary distribution grouped by discipline and gender",
+       x="Discipline",
+       y="Salary")
+
+```
+
+
+#### Discussion from the table above
+
+We can tell the following from looking at the summary statistics and graphical display:
+  
+  -Male Full-time Professors, Associate Professors and Assistant Professors have higher average salary as compared to Female faculty.
+
+- Male faculty have on average higher salary compared to Female Faculty across both Theoretical and Applied disciplines.
+
+
+
+### Testing for transformation of the variable
+```{r,warning=FALSE,tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+Transform<-powerTransform(cbind(yrs.since.phd,yrs.service,salary)~1,data=Salaries)
+summary(Transform)
+
+# Testing recommended transformations
+testTransform(Transform,c(0.50,0.50,0))
+
+# Scatterplot matrix of transformed variable 
+scatterplotMatrix(~ log(salary) + sqrt(yrs.since.phd) +    sqrt(yrs.service),smooth=list(span=0.55,col.smooth=c("red"),col.spread=c("black"),lty.smooth=1,lwd=1),regLine=FALSE,data=Salaries,main="Transformed Scatterplot Matrix")
+
+scatterplotMatrix(~ salary + yrs.since.phd +  yrs.service,smooth=list(span=0.55,col.smooth=c("red"),col.spread=c("black"),lty.smooth=1,lwd=1),regLine=FALSE,data=Salaries,main="Original Scatterplot Matrix")
+
+```
+
+#### Discussion from testing for variable transformation
+
+We can tell from the scatterplot matrix, the variables salary, yrs since phd and yrs of service may require some transformation. After perfoming the transformation test we are able to see that salary, yrs since phd and yrs of service requires transform with power that decrease. The hypothesis test for doing nothing and testing for transforming to all logs are both clearly rejected with small values. We have tested the null hypothesis of power sequence (0, 0.5, 0.5) and reasonably big p-value (p>0.05) shows some evidence that the transformation would be helpful to produce more linear relationships with salary response, and produce models with better properties from linearity of predictos (as you can tell from the transformed scatter matrix plot).
+
+\clearpage
+
+## Model Building
+
+```{r,tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+# Computes the unadjusted gender pay gap
+m1<-lm(log(salary) ~sex, data=Salaries)
+#summary(m1)
+
+# Computes the gender pay gap adjusted for human capital
+m2<-lm(log(salary) ~sex + sqrt(yrs.since.phd) + sqrt(yrs.service), data=Salaries) 
+#summary(m2)
+
+# Computes the gender pay gap adjusting for all the relevant variables included in the dataset
+m3<-lm(log(salary) ~ sex + sqrt(yrs.since.phd) + sqrt(yrs.service) + rank + discipline, data=Salaries) 
+#summary(m3)
+
+# Computes the gender pay gap adjusting for the interaction terms
+m4<-lm(log(salary) ~ sex*(rank + discipline) + sqrt(yrs.since.phd) + sqrt(yrs.service), data=Salaries)
+#summary(m4)
+
+m5<-lm(log(salary) ~ (sex + sqrt(yrs.since.phd) + sqrt(yrs.service) + rank + discipline)^2, data=Salaries)
+#summary(m5)
+
+m6<-lm(log(salary) ~ (sex + sqrt(yrs.since.phd) + sqrt(yrs.service) + rank + discipline)^3, data=Salaries)
+#summary(m6)
+
+```
+
+
+\clearpage
+
+## Assessment of Fit
+
+```{r,warning=FALSE}
+# Residual Plots
+residualPlots(m1,terms=~.,smooth=list(smoother=loessLine),quadratic=FALSE)
+residualPlots(m2,terms=~.,smooth=list(smoother=loessLine),quadratic=FALSE)
+residualPlots(m3,terms=~.,smooth=list(smoother=loessLine),quadratic=FALSE)
+residualPlots(m4,terms=~.,smooth=list(smoother=loessLine),quadratic=FALSE)
+residualPlots(m5,terms=~.,smooth=list(smoother=loessLine),quadratic=FALSE)
+residualPlots(m6,terms=~.,smooth=list(smoother=loessLine),quadratic=FALSE)
+
+# Marginal Plots
+marginalModelPlots(m1)
+marginalModelPlots(m2)
+marginalModelPlots(m3)
+marginalModelPlots(m4)
+marginalModelPlots(m5)
+marginalModelPlots(m6)
+
+
+# Test AIC - m4 is the best model 
+AIC(m1,m2,m3,m4,m5,m6)
+
+# Anova Test for base model and the best model
+Anova(m3)
+Anova(m4)
+
+
+# anova Test between base model and the best model
+anova(m3,m4,test="LRT")
+
+# Hoslem test to for model fit
+hoslem.test(Salaries$salary,fitted(m4),g=5)
+
+``` 
+
+
+#### Discussion for choosing the best model
+
+Some manual model building shows evidence that all the transformed predictors are needed along with the log of salary, and the rank and discipline need to be interacted with gender. From looking at the AIC values for each model, the second most complicated model (m5) should be used. However, looking at the F-test we have enough evidence to support the Alternative Hypothesis that m4 helps explain the log(salary) compared to other models. Moreover, looking at the residual plots there is not a significant change in the residual plots between m3 and m4 and the model fits perfectly with the data. Hence, we decide to go with model (m4) which holds all the variables included in the data including two interaction terms between sex:rank and sex:discipline.
+The very high p-value (p-value = 1) from Hosmer Lemeshow test shows significant evidence for the Null Hypothesis -- model fits well with the data. 
+
+
+
+```{r,warning=FALSE}
+
+# Regression diagnostics for the best model
+influenceIndexPlot(m4)
+dfbetasPlots(m4)
+influencePlot(m4,id.n=8)
+outlierTest(m4)
+
+```
+
+#### Discussion on Regression Diagnostics of the model used
+
+From the influence index plot, we can see there are few cases that may potentially be outliers in the dataset. Cases such as 283 and 318 shows large cook's distance and very high standardized residuals. The dfbeta plots shows signs of concern for values that are -1 < df < 1. There are few points that are close to 0.5. From the influence plot, we can see that cases such as 283 and 317 have huge cook's distance, case 317 may have that because of high leverage (unusual predictor value) and case 283 may have very unsual response value. 
+The outlier test shows case 283 is considered an outlier with p-value = 0.051 (showing just enough evidence). 
+
+
+
+The influential case= 283 according to the dfbetas and cook's distance. Now evaluating the model estimates without the outlier case here.
+
+```{r,tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+Salariessub<-subset(Salaries, rownames(Salaries) != "283")
+M4<-lm(log(salary) ~ sex*(rank + discipline) + sqrt(yrs.since.phd) + sqrt(yrs.service), data=Salariessub)
+hoslem.test(Salariessub$salary,fitted(M4),g=5)
+compareCoefs(m4,M4)
+
+```
+
+#### Discussion of comparing coefficients without the outlier case
+
+Comparing the coefficients and the outlier, removing the outlier case from the data didn't make any significant change in the beta estimates of the model. SexMale and SexMale : disciplineB were slightly changed indicating it was a male faculty possibly from discipline B with the unusual salary.
+
+
+#### Comparing the model with Regression Classification Tree
+
+```{r,tidy=TRUE, tidy.opts=list(width.cutoff=60),warning=FALSE}
+## Training set will be 75% of the sample size
+smp_size<- floor(0.75* nrow(Salaries))
+train_ind<-sample(seq_len(nrow(Salaries)),size=smp_size)
+
+# Creating training and test sets
+train<- Salaries[train_ind,]
+test<- Salaries[-train_ind,]
+
+
+
+fit<- rpart(lm(log(salary) ~ sex + sqrt(yrs.since.phd) + sqrt(yrs.service) + rank + discipline, method = "anova",data=train))
+fit
+rpart.plot(fit,type=4,extra=101)
+plotcp(fit)
+
+# Prune the tree
+pfit<- prune(fit, cp=0.012)
+rpart.plot(pfit,type=4,extra=101)
+
+m4a<- lm(log(salary) ~ sex*(rank + discipline) + sqrt(yrs.since.phd) + sqrt(yrs.service), data=train)
+summary(m4a)
+# Evaluating the prune tree model
+regr.eval(test$salary, preds=predict(pfit,test), train.y=train$salary)
+
+# Evaluating the actual model
+regr.eval(test$salary, preds=predict(fit,newdata=test), train.y=train$salary)
+
+
+```
+#### Discussion of comparing with tree model
+
+The rmse measure is measuring the typical size of a residual and shows that the MLR model has 0.003 points higher than the tree model (which is not substantial). The MLR model has 0.001 mae points higher than the tree model -- indicating that there is not a significant difference in estimates between the tree model and MLR model. 
+
+
+### Using rms package and splines to capture 
+
+```{r,tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+dd<- datadist(Salaries)
+options(datadist = 'dd')
+Fm4<- lrm(log(salary) ~ sex*(rank + discipline) + rcs(sqrt(yrs.since.phd),3) + rcs(sqrt(yrs.service),3), data=Salaries,x=TRUE,y=TRUE)
+#print(Fm4)
+plot(Predict(Fm4))
+anova(Fm4)
+
+```
+
+We tested whether the rms model requires splines and after looking at the anova test we can tell from large p-value of total non-linear that we do not require any measures for non-linearity. 
+From the development later using the glm function, we know that there is no particular need for other terms or transforms. We will continue using the linear forms for predictors - yrs since phd and yrs of service as faculty.
+
+```{r,tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+fm4<- lrm (log(salary) ~ sex*(rank + discipline) + sqrt(yrs.since.phd) + sqrt(yrs.service), data=Salaries,x=TRUE,y=TRUE)
+anova(fm4)
+```
+
+
+\clearpage
+
+## Analysis of Effects
+
+#### Effects Plot
+```{r}
+ggplot(Predict(fm4))
+# Effect plot for professors, separate lines for gender
+p<-Predict(fm4,yrs.service=seq(0,50,length=70), sex ,conf.int=0.95)
+plot(p)
+p1<-Predict(fm4,yrs.since.phd=seq(1,50,length=51), sex ,conf.int=0.95)
+plot(p1)
+plot(predictorEffects(m4, ~sex), multiline = TRUE)
+plot(allEffects(m4))
+```
+
+#### Discussion on the effects plot
+
+
+- Comparing the predicted salary across disciplines, we can tell from the effects plot that faculty working in Applied Department have higher chance of receiving higher salary as compared to faculty in Theoretical Department.
+
+- Comparing the predicted salary across different ranking of faculty, we can tell from the effects plot that Full-time Professors have the highest chance of receiving higher salary compared to Associate Professors and Assistant Professors. We can also tell that Associate Professors have higher chance of receiving higher salary as compared to Assistant Professors. 
+
+- Comparing the predicted salary across two genders of faculty, we can tell that both Male and Female have very similar chances of receiving higher salary - in this case the plots show that actually Female faculty have a slightly higher chance.
+
+- The effects plot shows that the chances of getting higher salary decreases as the faculty served more years at the university.
+
+- The effects plot shows that the chances of getting higher salary increases as the faculty had spent more years after receiving their phd.
+
+- From the effects plot, we can see that Male faculty receives higher salary as Assistant Professor, Associate Professor and Full-time Professors in Theoretical Department. In Applied Department, we can see that Male Associate faculty receives slightly higher salary as compared to Female faculty, however, Female Assistant Professor receives higher salary than Male Assistant Professor and equivalent salary as Full-time Professors in Applied Department.
+
+- If we pay close attention to the sex * rank effect plot, we see something very interesting. For female faculty, the salary increases at a much faster rate when they are promoted from Associate to a Full-time Professor. For male faculty, the salary increases at a more steady rate when promoted to next level in the heirarchy. 
+
+- If we pay close attention to the sex * discipline effect plot, we can see that Male faculty generally have higher salary compared to Female faculty in Theoretical Department. Both Male and Female faculty have similar salary in Applied Department.
+
+#### Comparison and Odds Ratio
+
+```{r,tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+# General model
+m4<-lm(log(salary) ~ sex*(rank + discipline) + sqrt(yrs.since.phd) + sqrt(yrs.service), data=Salaries)
+#summary(m4)
+confint(m4)
+exp(coef(m4))
+exp(confint(m4))
+```
+
+
+#### Discussion on the odds ratio
+
+
+
+```{r,tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+library(emmeans)
+emmip(m4, sex ~ rank| discipline)
+
+```
+
+We can see from the plot here that:
+  
+  - In Theoretical Department, Male faculty receive higher salary in all levels of position (Assistant, Associate and Full-time Professors). 
+
+- In Applied Department, Female faculty receive higher salary as Assistant Professors, lower salary as Associate Professors and equivalent salary as Full-time Professors compared to Male faculty.
+
+```{r,tidy=TRUE, tidy.opts=list(width.cutoff=80)}
+
+m4.lsm<-emmeans(m4, ~ sex*(rank+discipline) + sqrt(yrs.since.phd) + sqrt(yrs.service),type="response")
+#summary(m4.lsm)
+
+# Odds ratios for faculty salary across levels of rank and discipline
+confint(pairs(m4.lsm,by=c("discipline","rank"),reverse=TRUE))
+
+```
+
+#### Discussion from the regression model
+
+- Male faculty: The estimated odds ratio for male faculty is 1.058 with confidence interval (0.928, 1.207) containing 1.0. Suggesting no evidence in difference in percentage of salary between faculty across gender, holding rank,discipline, yrs of service and yrs since phd constant.
+
+- Discipline B: The estimated odds ratio for discipline B is 1.236 with confidence interval (1.101, 1.387). Suggesting clear evidence that faculty teaching in Applied Department has 1.236 times the chance of higher percentage of salary compared to faculty in Theoretical Department holding sex, rank, yrs of service and yrs since phd constant.
+
+
+```{r}
+# Odds ratios for faculty salary across levels of rank
+confint(pairs(m4.lsm, by="rank",reverse=TRUE))
+```
+
+#### Discussion from emmeans comparison
+
+- MaleB and FemaleA: The odds ratio for male faculty in Applied Department is 1.198 with confidence interval (1.011, 1.421). Suggesting clear evidence that male Asst Prof faculty teaching in Applied Department has 1.198 times the chance of higher percentage of salary compared to Asst Prof female faculty in Theoretical Department. Since the confidence interval is entirely above 1.0 the difference is statistically significant holding rank = Asst Prof constant.
+
+-  MaleB and FemaleA: The odds ratio for male faculty in Applied Department is 1.294 with confidence interval (1.074, 1.560). Suggesting clear evidence that male Assoc Prof faculty teaching in Applied Department has 1.294 times the chance of higher percentage of salary compared to Assoc Prof female faculty in Theoretical Department. Since the confidence interval is entirely above 1.0 the difference is statistically significant holding rank = Assoc Prof constant.
+
+-  MaleB and FemaleA: The odds ratio for male faculty in Applied Department is 1.240 with confidence interval (1.073, 1.433). Suggesting clear evidence that male Full-time Prof faculty teaching in Applied Department has 1.240 times the chance of higher percentage of salary compared to Full-time Prof female faculty in Theoretical Department. Since the confidence interval is entirely above 1.0 the difference is statistically significant holding rank = Full-time Prof constant.
+
+```{r,tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+# RMS model
+fm4<- lrm (log(salary) ~ sex*(rank + discipline) + sqrt(yrs.since.phd) + sqrt(yrs.service), data=Salaries,x=TRUE,y=TRUE)
+```
+
+```{r}
+summary(fm4,sex='Female',discipline='A',rank='AsstProf')
+summary(fm4,sex='Female',discipline='B',rank='AsstProf')
+#plot(summary(fm4,sex='Female',discipline='A',rank='AsstProf'))
+```
+
+#### Discussion on odds ratio 
+
+- The odds of salary for Male Asst Prof in discipline A is 2.42 times that of a Female Asst Prof in discipline A. The confidence interval for the odds ratio is (0.71, 8.12), showing no evidence to suggest that the faculty salary differ across gender after adjusting for discipline = A and rank = AsstProf.
+
+- The odds of salary for Male Asst Prof in discipline B is 0.778 times that of a Female Asst Prof in discipline B. The confidence interval for the odds ratio is (0.219, 2.77), showing no evidence to suggest that the faculty salary differ across gender after adjusting for discipline = B and rank = AsstProf.
+
+
+
+```{r}
+summary(fm4,sex='Female',discipline='A',rank='AssocProf')
+summary(fm4,sex='Female',discipline ='B',rank='AssocProf')
+#plot(summary(fm4,sex='Female',discipline='A',rank='AssocProf'))
+```
+
+#### Discussion on odds ratio 
+
+- The odds of salary for Male Assoc Prof in discipline A is 4.76 times that of a Female Assoc Prof in discipline A. The confidence interval for the odds ratio is (1.201, 18.865), showing evidence to suggest that the faculty salary differ across gender after adjusting for discipline = A and rank = AssocProf.
+
+- The odds of salary for Male Assoc Prof in discipline B is 1.532 times that of a Female Assoc Prof in discipline B. The confidence interval for the odds ratio is (0.419, 5.604), showing no evidence to suggest that the faculty salary differ across gender after adjusting for discipline = B and rank = AssocProf.
+
+
+
+```{r}
+summary(fm4,sex='Female',discipline='A',rank='Prof')
+summary(fm4,sex='Female',discipline='B',rank='Prof')
+#plot(summary(fm4,sex='Female',discipline='A',rank='Prof'))
+```
+
+#### Discussion on odds ratio 
+
+- The odds of salary for Male Full-time Prof in discipline A is 2.64 times that of a Female Full-time Prof in discipline A. The confidence interval for the odds ratio is (0.93, 7.51), showing no evidence to suggest that the faculty salary differ across gender after adjusting for discipline = A and rank = Prof.
+
+- The odds of salary for Male Full-time Prof in discipline B is 0.8511 times that of a Female Full-time Prof in discipline B. The confidence interval for the odds ratio is (0.3412, 2.123), showing no evidence to suggest that the faculty salary differ across gender after adjusting for discipline = B and rank = Prof.
+
+
+```{r,tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+
+summary(fm4,sex='Female',discipline='A',rank='AsstProf',yrs.service=c(8,18,28),yrs.since.phd=c(12,22,32))
+#plot(summary(fm4,sex='Female',discipline='A',rank='AsstProf',yrs.service=c(8,18,28),yrs.since.phd=c(12,22,32)))
+
+
+summary(fm4,sex='Female',discipline='A',rank='AssocProf',yrs.service=c(8,18,28),yrs.since.phd=c(12,22,32))
+#plot(summary(fm4,sex='Female',discipline='A',rank='AssocProf',yrs.service=c(8,18,28),yrs.since.phd=c(12,22,32)))
+
+
+summary(fm4,sex='Female',discipline='A',rank='Prof',yrs.service=c(8,18,28),yrs.since.phd=c(12,22,32))
+#plot(summary(fm4,sex='Female',discipline='A',rank='Prof',yrs.service=c(8,18,28),yrs.since.phd=c(12,22,32)))
+
+
+summary(fm4,sex='Female',discipline='B',rank='AsstProf',yrs.service=c(8,18,28),yrs.since.phd=c(12,22,32))
+#plot(summary(fm4,sex='Female',discipline='B',rank='AsstProf',yrs.service=c(8,18,28),yrs.since.phd=c(12,22,32)))
+
+summary(fm4,sex='Female',discipline='B',rank='AssocProf',yrs.service=c(8,18,28),yrs.since.phd=c(12,22,32))
+#plot(summary(fm4,sex='Female',discipline='B',rank='AssocProf',yrs.service=c(8,18,28),yrs.since.phd=c(12,22,32)))
+
+summary(fm4,sex='Female',discipline='B',rank='Prof',yrs.service=c(8,18,28),yrs.since.phd=c(12,22,32))
+#plot(summary(fm4,sex='Female',discipline='B',rank='Prof',yrs.service=c(8,18,28),yrs.since.phd=c(12,22,32)))
+```
+
+
+#### Discussion odds ratio at different levels of yrs of service and yrs since phd of the faculty
+
+-  There is significant difference in salary between Male and Female faculty within Associate Professor in discipline A. 
+
+- There is no significant difference in salary across gender within Assistant and Full-time Professor in both disciplines A and B.
+
+- Years of service by and faculty and years since phd has no effect on the significance level in salary across both genders.
+
